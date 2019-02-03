@@ -46,6 +46,7 @@ A          |95%        |90%     |92.4%
 B          |98%        |85%     |91.0%
 
 Consider one is evaluating the performance of the cat app among different demographics. An error rate of which is listed below. It will simplify the selection of the algorithm if one is evaluating based on the average error rate.
+
 Algorithm | US  | China | India | Other | Average
 --------- |-----|-------|-------|-------|--------
 A         | 3%  | 7%    | 5%    | 9%    | 6%
@@ -80,6 +81,7 @@ Traditionally, for a machine learning problem train/test split was defined to be
 ### When to change dev/test sets and metrics
 
 For a cat classifier, assume we have two models A and B. From the table below, Model A is better but it classify and include porn images in the predictions. Though 3% error rate is a good metric wrt dev set, this model is completely unacceptable for users of the app.
+
 Algorithm | Error rate | Remark
 ----------|------------|---------
  A        | 3%         | Misclassify porn images as cat
@@ -109,6 +111,7 @@ If for a model performance is less than human level performance then there are t
 While training a model we get two type of errors, train and dev. If difference between train and dev error is more than train and human level performance, then one should focus more on reducing train-dev error gap. This error difference between test-dev set is called *variance*. The methods discussed in previous section can be used here. If difference between test and human level performance is more, then this should be the focus. This is called as *Avoidable bias*.
 
 In below table, for model 1, focus should be to reduce variance and in model 2 it should be to reduce avoidable bias.
+
 Source        | Accuracy model 1  | Accuracy model 2
 --------------|-------------------|-----------------
 Team of humans| 0.5%              | 0.5%
