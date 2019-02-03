@@ -42,15 +42,15 @@ When improving the performance of the cat model, whichever method one use, using
 
 Classifier | Precision | Recall | F1 Score
 -----------|-----------|--------|---------
-A |95%  |90%  |92.4%
-B |98%  |85%  |91.0%
+A          |95%        |90%     |92.4%
+B          |98%        |85%     |91.0%
 
 Consider one is evaluating the performance of the cat app among different demographics. An error rate of which is listed below. It will simplify the selection of the algorithm if one is evaluating based on the average error rate.
-Algorithm | US | China | India | Other | Average
----------|-----|----|----|----|----
-A | 3% | 7% | 5% | 9%  | 6%
-B | 5% | 6% | 5% | 10% | 6.5%
-C | 2% | 3% | 4% | 5%  | 3.5%
+Algorithm | US  | China | India | Other | Average
+--------- |-----|-------|-------|-------|--------
+A         | 3%  | 7%    | 5%    | 9%    | 6%
+B         | 5%  | 6%    | 5%    | 10%   | 6.5%
+C         | 2%  | 3%    | 4%    | 5%    | 3.5%
 
 ### Satisficing and optimizing metrics
 
@@ -59,11 +59,13 @@ Consider a cat classifier. For the app one wants a model with high accuracy and 
 > $$maximizeAccuracy \mid runtime <= 100ms \tag{2}$$
 
 In eqaution 2, accuracy is defined as `optimizing metric` and runtime is defined as `satisfying metric`.
+
 Classifier | Accuracy | Running time
----------|----------|---------
- A | 90% | 80ms
- B | 92% | 95ms
- C | 95% | 1,500ms
+-----------|----------|-------------
+ A         | 90%      | 80ms
+ B         | 92%      | 95ms
+ C         | 95%      | 1,500ms
+
 Generally, if one has N metrics for a problem, one metric is optimizing metric while (N-1) metrics are satisficing metrics. For example, consider wakeword/ trigger model (Alexa, google home etc). Here one would like to increase accuracy, while decreasing false positive cases. Metric for this problem can be phrased as,
 >maximize accuracy | (number of false positive) < 2,  every 24 hour
 
@@ -79,9 +81,9 @@ Traditionally, for a machine learning problem train/test split was defined to be
 
 For a cat classifier, assume we have two models A and B. From the table below, Model A is better but it classify and include porn images in the predictions. Though 3% error rate is a good metric wrt dev set, this model is completely unacceptable for users of the app.
 Algorithm | Error rate | Remark
----------|----------|---------
- A | 3% | Misclassify porn images as cat
- B | 5% | Doesn't include porn images
+----------|------------|---------
+ A        | 3%         | Misclassify porn images as cat
+ B        | 5%         | Doesn't include porn images
 
 A new error metric can be defined for the model as below.
 > $$Error=\frac{1}{n_{dev}}\sum_{i=1}^{n_{dev}} w^{(i)}\mathcal{L}\{y_{pred} \neq y^{(i)}\}\\
@@ -99,3 +101,86 @@ For a model do the orthogonalization as follow
 - Change the dev set if model is performing well on metric and dev set but not in real world (for example, images shared by an user may not be of high quality but one used for training is).
 
 ### Comparing human-level performance
+
+For a classifier, lowest achievable error is known as *Bayes optimal error*. It represent a very best mapping function which cannot be surpassed. For a given machine learning problem, *human level performance* are not much far from bayes optimal error. Therefore, it is more convinient to compare and aim towards human level performance while training a model. Human level performance is a *proxy* for bayes optimal error,
+
+If for a model performance is less than human level performance then there are tool sets which can bridge this gap. For example, get labelled data from humans, better analysis of bias/variance, get analysis from mannual error analysis, analysing why did a person got this right.
+
+While training a model we get two type of errors, train and dev. If difference between train and dev error is more than train and human level performance, then one should focus more on reducing train-dev error gap. This error difference between test-dev set is called *variance*. The methods discussed in previous section can be used here. If difference between test and human level performance is more, then this should be the focus. This is called as *Avoidable bias*.
+
+In below table, for model 1, focus should be to reduce variance and in model 2 it should be to reduce avoidable bias.
+Source        | Accuracy model 1  | Accuracy model 2
+--------------|-------------------|-----------------
+Team of humans| 0.5%              | 0.5%
+One human     | 0.1%              | .1%
+Train error   | 0.2%              | 0.3%
+Dev error     | 0.8%              | 0.4%
+
+When a model surpasses human level performance, the further improvement methods are not clear but it is possible. For problems like online advertisement, product recommendations, logistics (shipment time prediction), loan approvals etc the models performing better than humans are available. These problems are not a natural perception problem and involves structural data. Computers are better in examining these large dimensional data than humans. For problems involving natural perception, only recently models has achieved/surpassed human level performance (speech recognition, medical diagnostics etc).
+
+#### Guidelines to improve model performance
+
+For a supervised learning problem there are two fundamental assumptions. First, one can fit the train set pretty well therefore decreasing the avoidable biases. Second, training set performance generalize well to dev/test set, decreasing the variance. Observer the difference between bias and variance before doing the optimizations.
+
+For reducing the avoidable bias consider
+
+- Train bigger model
+- Train longer, use better optimizer algorithm, RMSprop, Adam
+- Try other neural network architectures, do hyperparameter search
+- Decrease Regularization
+
+For reducing the variance consider
+
+- Collecting more data
+- Regularization
+- L2, dropout, data augmentation
+- Try other neural network architectures, do hyperparameter search
+
+### Error analysis
+
+After training a model carrying out error analysis is important. It can be done by hand in an excel sheet. This analysis helps in selecting and prioritizing approaches along which a model can be optimized further. Manually examining the errors helps. For example, a cat classifier mis-classifying dogs as cat. Is it worthwhile for a team to spend six months creating a dog classifier? Following approaches can help in answering this.
+
+- Get ~100 mislabelled dev set examples.
+- Count up the number of dogs.
+- If it is 5%, then removing this error will improve model performance only by 0.5% (initial performance 90%).
+- Evaluate if this improvemnt is significant and desirable.
+
+Ideas for cat detector
+
+- Fix pictures of dogs being recognized as cat.
+- Fix great cats being mis classified.
+- Improve performance on blurry images.
+
+Create a spreadsheet considering above and mannually analyzing misclassified images from dev sets. These percentages represent *ceiling* of improvements along the ideas.
+
+
+Column A   | Dog      |Great cats| Blurry  | Comments
+-----------|----------|----------|---------|---------
+ 1         |          |*         |         | out zoo
+ 2         |*         |          |         | pitbull
+ 3         |          |          |*        | rainy day
+ .         |.         |.         |.        |.
+ .         |.         |.         |.        |.
+ % of total|8%        |51%       |41%      |100%
+
+### Cleaning up incorrectly labelled data
+
+Deep learning algorithms are robust to random errors (wrong key pressed) but are more prone to systematic errors. While doing error analysis add a column for incorrectly labeled data.
+
+Column A   | Dog      |Great cats| Incorrect label| Comments
+-----------|----------|----------|----------------|---------
+ 1         |          |          |*               | labeller missed cat in background
+ 2         |          |          |*               | drawing of a cat, not a real cat
+ 3         |          |          |*               | instagram filter
+ .         |.         |.         |.               |.
+ .         |.         |.         |.               |.
+ % of total|8%        |51%       |41%             |100%
+
+- If correcting this improve the model performance significantly, then it should be done.
+- Same process should be applied to the dev and test set to make sure they belong to the same distribution.
+- Also consider examining examples which model got right along with wrong one. Sometime it may be mislabelled and can introduce bias.
+- Train and dev/test set after this transformations may now come from a slightly different distribution. Train data is often larger to apply above manual analysis. Different approaches as discussed below need to be followed here.
+
+### Build first system quickly then iterate
+
+For a machine learning problem, one must be aware about the different challenges. For example, for speech recognition noisy background, accented speech etch are the challenges. How to pick and address challenges is an important question. Building first system and iterating quickly is a good approach. Set up the dev/test set and setup a metric. Use bias/variance analysis and error analysis to prioritize next steps.
