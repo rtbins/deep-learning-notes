@@ -22,7 +22,7 @@ To fine tune a model many methods and approaches can be tried. An efficient ML p
 
 ### Chain of assumptions in ML
 
-- Fit training set well on the cost function
+- Fit training set well on the cost function 
   - to get human-level performance also depends on use cases
   - knobs: network size, type of optimizer(Adam)
 - Fit dev set well on the cost function
